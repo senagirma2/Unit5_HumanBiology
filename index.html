@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit 5: Biological Systems Simulations - Index</title>
+    <style>
+        /* Common Styles (subset for index page) */
+        :root {
+            --bg-cream: #FFFBF0;
+            --bg-white: #FFFFFF;
+            --text-black: #2c2c2c;
+            --text-medium-gray: #555555;
+            --accent-muted-green: #8FBC8F;
+            --button-primary-bg: var(--accent-muted-green);
+            --button-primary-hover-bg: #7aa77a;
+            --highlight-yellow: #FFF3CD;
+            --highlight-yellow-border: #FFEBAA;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-cream);
+            color: var(--text-black);
+            font-size: 16px;
+        }
+        .container { /* General container style from main_styles.css */
+            max-width: 1000px;
+            margin: 25px auto;
+            background: var(--bg-white);
+            padding: 30px 35px;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+            border: 1px solid #e0e0e0;
+        }
+        h1 { 
+            font-size: 2.2em; 
+            border-bottom: 2px solid var(--accent-muted-green);
+            padding-bottom: 15px;
+            margin-bottom: 35px;
+            color: var(--text-black);
+            text-align: center;
+            font-weight: 600;
+        }
+        h3.note-title {
+            font-size: 1.3em;
+            margin-top: 0;
+            margin-bottom: 10px;
+            text-align: left;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .note {
+            background-color: var(--highlight-yellow);
+            border-left: 6px solid var(--highlight-yellow-border);
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+            font-size: 0.98em;
+        }
+        .note p { margin: 10px 0; line-height: 1.6; }
+        .note ul { list-style-position: inside; padding-left: 0; }
+
+
+        /* Specific styles for the index page */
+        .index-container { 
+            text-align: center;
+        }
+        .simulation-links ul {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        .simulation-links li {
+            margin: 18px 0;
+        }
+        .simulation-links a {
+            display: inline-block;
+            padding: 15px 30px; 
+            background-color: var(--button-primary-bg);
+            color: var(--bg-white);
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 1.15em; 
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            min-width: 320px; 
+            font-weight: 500;
+        }
+        .simulation-links a:hover {
+            background-color: var(--button-primary-hover-bg);
+            transform: translateY(-2px);
+        }
+        .index-intro {
+            font-size: 1.1em;
+            color: var(--text-medium-gray);
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container index-container"> 
+        <h1>Unit 5: Biological Systems Simulations</h1>
+        <p class="index-intro">Welcome to the interactive simulations for Unit 5. These modules are designed to help you understand complex biological processes in an engaging way. Choose a system below to explore:</p>
+        
+        <nav class="simulation-links">
+            <ul>
+                <li><a href="simulation_circulatory.html">1. The Circulatory System: A Journey of Blood</a></li>
+                <li><a href="simulation_cardiovascular.html">2. Understanding Cardiovascular Diseases</a></li>
+                <li><a href="simulation_nervous.html">3. Exploring the Nervous System</a></li>
+            </ul>
+        </nav>
+
+        <div class="note" style="margin-top: 40px; text-align: left;">
+            <h3 class="note-title">How to Use These Simulations:</h3>
+            <p>Each simulation page includes:</p>
+            <ul>
+                <li>An introductory note explaining the simulation's purpose.</li>
+                <li>An interactive area where you can control or observe the system.</li>
+                <li>Status messages to guide you through the process.</li>
+                <li>A "Learn More" section with key takeaways and further information related to the topic.</li>
+            </ul>
+            <p>We hope you find these tools helpful for your learning!</p>
+        </div>
+    </div>
+    <img src="images/realistic_heart.png" alt="Girl in a jacket" width="500" height="600">
+</body>
+</html>
