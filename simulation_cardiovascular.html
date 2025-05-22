@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardiovascular Disease Simulations</title>
+    <style>
+        /* Common Styles (subset from main_styles.css) */
+        :root { /* Duplicating for self-containment, ideally from a linked sheet */
+            --bg-cream: #FFFBF0; --bg-white: #FFFFFF; --bg-light-yellowish-green: #E6F0E0;
+            --text-black: #2c2c2c; --text-medium-gray: #555555; --accent-muted-green: #8FBC8F;
+            --highlight-yellow: #FFF3CD; --highlight-yellow-border: #FFEBAA;
+            --button-primary-bg: var(--accent-muted-green); --button-primary-hover-bg: #7aa77a;
+            --button-secondary-bg: #A9A9A9; --button-secondary-hover-bg: #808080;
+            --border-color: #ddd;
+        }
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;line-height:1.7;margin:0;padding:20px;background-color:var(--bg-cream);color:var(--text-black);font-size:16px}
+        .container{max-width:1000px;margin:25px auto;background:var(--bg-white);padding:30px 35px;border-radius:12px;box-shadow:0 5px 25px rgba(0,0,0,0.08);border:1px solid #e0e0e0}
+        h1,h2,h3.sim-title{color:var(--text-black);text-align:center;margin-bottom:25px;font-weight:600}
+        h1{font-size:2.2em;border-bottom:2px solid var(--accent-muted-green);padding-bottom:15px;margin-bottom:35px}
+        h2{font-size:1.8em;margin-top:35px;color:#444}
+        h3.sim-title{font-size:1.5em;margin-top:30px;color:var(--accent-muted-green)}
+        h3.note-title,h3.learn-more-title{font-size:1.3em;margin-top:0;margin-bottom:10px;text-align:left;color:#333;border-bottom:1px solid #eee;padding-bottom:5px}
+        .sub-simulation{background:#f9f9f9;padding:25px;margin-bottom:35px;border-radius:8px;border:1px solid var(--border-color)}
+        .sim-controls{text-align:center;margin-bottom:25px;padding:15px;background-color:var(--bg-light-yellowish-green);border-radius:6px;border:1px solid #d0e0c0}
+        .sim-controls button,.sim-controls input[type=range]{margin:8px 10px;padding:12px 20px;font-size:1em;cursor:pointer;background-color:var(--button-primary-bg);color:var(--bg-white);border:none;border-radius:5px;transition:background-color .2s ease,transform .1s ease;font-weight:500}
+        .sim-controls button:hover{background-color:var(--button-primary-hover-bg)}
+        .sim-controls button:active{transform:translateY(1px)}
+        .sim-controls label{margin-right:10px;font-weight:500;color:var(--text-medium-gray)}
+        .sim-area{position:relative;min-height:150px;background-color:var(--bg-white);border:1px solid var(--border-color);padding:20px;border-radius:6px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:20px}
+        .sim-status{text-align:center;margin-top:0;font-style:normal;color:var(--text-medium-gray);background-color:#f0f0f0;padding:12px;border-radius:0 0 6px 6px;font-size:1em;min-height:45px;border:1px solid var(--border-color);border-top:none}
+        .note{background-color:var(--highlight-yellow);border-left:6px solid var(--highlight-yellow-border);padding:20px;margin-bottom:25px;border-radius:5px;font-size:.98em}
+        .note p{margin:10px 0;line-height:1.6}
+        .learn-more-section{background-color:var(--bg-light-yellowish-green);border:1px solid #d0e0c0;padding:20px 25px;margin-top:30px;border-radius:8px}
+        .learn-more-section ul{list-style-type:disc;margin-left:25px;padding-left:0}
+        .learn-more-section li{margin-bottom:8px;line-height:1.6}
+        .back-link-container{text-align:center}
+        .back-link{display:inline-block;margin:35px auto 10px;padding:12px 25px;background-color:var(--button-secondary-bg);color:var(--bg-white);text-decoration:none;border-radius:5px;transition:background-color .3s ease;font-weight:500;text-align:center}
+        .back-link:hover{background-color:var(--button-secondary-hover-bg)}
+
+        /* Styles specific to cardiovascular_disease.html */
+        #atherosclerosis-viz-container{width:80%;max-width:500px;height:120px;margin:20px auto;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid #bca0a0;background-color:#ffe0e0;border-radius:10px;padding:10px}
+        .artery-wall-athero{width:100%;height:20px;background-color:#e09090;border-radius:8px}
+        .artery-lumen-athero{width:100%;height:60px;background-color:#ffcccc;display:flex;flex-direction:column;justify-content:space-between;align-items:center;transition:height .4s ease-in-out;position:relative;overflow:hidden;margin:5px 0}
+        .plaque-athero{width:100%;height:0%;background-color:#f5e5a0;transition:height .4s ease-in-out}
+        .blood-flow-text{font-size:.9em;color:#a00000;padding:3px 6px;background-color:rgba(255,255,255,.6);border-radius:4px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;opacity:1;transition:opacity .3s ease}
+        #hypertension-viz-container{width:300px;height:100px;margin:20px auto;display:flex;align-items:center;justify-content:center}
+        .blood-vessel-hypertension{width:250px;height:50px;background-color:#e09090;border-radius:25px;padding:5px;display:flex;justify-content:center;align-items:center;box-shadow:inset 0 0 5px rgba(0,0,0,.2)}
+        .vessel-lumen-hypertension{width:90%;height:30px;background-color:#ffadad;border-radius:15px;transition:width .4s ease-in-out,background-color .4s ease-in-out;display:flex;align-items:center;justify-content:center;overflow:hidden}
+        #blood-pressure-value{font-weight:700;font-size:1.3em;color:var(--text-black);margin-bottom:10px;text-align:center;}
+        .blood-flow-hypertension-text{font-size:.8em;color:#fff;text-shadow:1px 1px 2px rgba(0,0,0,.5)}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>2. Understanding Cardiovascular Diseases</h1>
+        <div class="note">
+            <h3 class="note-title">About these Simulations:</h3>
+            <p>Cardiovascular diseases are a leading cause of health issues worldwide. These simulations aim to provide a basic understanding of two common conditions: Atherosclerosis and Hypertension.</p>
+            <p>Interact with the controls to see how these conditions can affect blood vessels and blood flow. The "Learn More" sections provide key information about each condition.</p>
+        </div>
+
+        <div class="sub-simulation" id="atherosclerosis-sim">
+            <h3 class="sim-title">2a. Atherosclerosis (Plaque Buildup)</h3>
+            <div class="sim-controls">
+                <label for="plaqueLevelSlider">Adjust Plaque Level (0-100%):</label>
+                <input type="range" id="plaqueLevelSlider" min="0" max="100" value="5" step="5">
+                <span id="plaqueLevelDisplay">5%</span>
+            </div>
+            <div class="sim-area" id="atherosclerosis-viz-container">
+                <div class="artery-wall-athero"></div>
+                <div class="artery-lumen-athero">
+                    <div class="plaque-athero" id="topPlaque"></div>
+                    <span class="blood-flow-text" id="atheroBloodFlowText">Normal Flow</span>
+                    <div class="plaque-athero" id="bottomPlaque"></div>
+                </div>
+                <div class="artery-wall-athero"></div>
+            </div>
+            <p class="sim-status" id="atherosclerosisStatus">Artery is currently healthy. Adjust the slider.</p>
+            <div class="learn-more-section">
+                <h3 class="learn-more-title">About Atherosclerosis:</h3>
+                <ul><li>Atherosclerosis is the buildup of fats, cholesterol, and other substances in and on your artery walls (plaque), which can restrict blood flow.</li><li>Plaque can cause arteries to narrow, blocking blood flow. The plaque can also burst, leading to a blood clot.</li><li>Risk factors include high cholesterol, high blood pressure, smoking, diabetes, obesity, and a family history.</li><li>Consequences can include chest pain (angina), heart attack, stroke, or peripheral artery disease.</li></ul>
+            </div>
+        </div>
+
+        <div class="sub-simulation" id="hypertension-sim">
+            <h3 class="sim-title">2b. Hypertension (High Blood Pressure)</h3>
+            <div class="sim-controls">
+                <button id="constrictVesselsBtn">Constrict Blood Vessels</button>
+                <button id="increaseVolumeBtn">Increase Blood Volume</button>
+                <button id="resetPressureFactorsBtn">Reset Factors</button>
+            </div>
+            <div class="sim-area" id="hypertension-viz-container">
+                 <div class="blood-vessel-hypertension">
+                    <div class="vessel-lumen-hypertension">
+                        <span class="blood-flow-hypertension-text" id="hypertensionBloodFlowText">Smooth</span>
+                    </div>
+                </div>
+            </div>
+            <p id="blood-pressure-value">Current Blood Pressure: Normal</p>
+            <p class="sim-status" id="hypertensionStatus">Blood pressure is normal. Use buttons to see effects.</p>
+            <div class="learn-more-section">
+                <h3 class="learn-more-title">About Hypertension:</h3>
+                <ul><li>Hypertension, or high blood pressure, is a condition where the force of the blood against your artery walls is consistently too high.</li><li>It often has no symptoms but can silently damage your cardiovascular system over time.</li><li>Factors that can increase blood pressure include: Vessel Constriction, Increased Blood Volume, and others like age, diet, etc.</li><li>Uncontrolled high blood pressure can lead to heart attack, stroke, heart failure, kidney disease, and vision loss.</li></ul>
+            </div>
+        </div>
+        <div class="back-link-container">
+            <a href="index.html" class="back-link">« Back to Unit 5 Simulations</a>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const plaqueLevelSlider = document.getElementById('plaqueLevelSlider');
+            const plaqueLevelDisplay = document.getElementById('plaqueLevelDisplay');
+            const arteryLumenAthero = document.querySelector('.artery-lumen-athero');
+            const topPlaque = document.getElementById('topPlaque');
+            const bottomPlaque = document.getElementById('bottomPlaque');
+            const atheroBloodFlowText = document.getElementById('atheroBloodFlowText');
+            const atherosclerosisStatus = document.getElementById('atherosclerosisStatus');
+
+            if (plaqueLevelSlider && arteryLumenAthero && topPlaque && bottomPlaque && atheroBloodFlowText && atherosclerosisStatus) {
+                plaqueLevelSlider.addEventListener('input', () => {
+                    const level = parseInt(plaqueLevelSlider.value);
+                    plaqueLevelDisplay.textContent = level + '%';
+                    const maxLumenDivHeight = arteryLumenAthero.clientHeight;
+                    const plaqueHeightPercentage = level / 100;
+                    const individualPlaqueVisualHeight = (maxLumenDivHeight / 2) * plaqueHeightPercentage; 
+                    topPlaque.style.height = individualPlaqueVisualHeight + 'px';
+                    bottomPlaque.style.height = individualPlaqueVisualHeight + 'px';
+                    let statusMsg = `Plaque buildup at ${level}%. `;
+                    let flowText = "Normal Flow"; let flowOpacity = 1;
+                    if (level < 10) { statusMsg += "Artery is relatively healthy."; }
+                    else if (level < 30) { statusMsg += "Minor plaque. Flow slightly affected."; flowText = "Slightly Reduced"; flowOpacity = 0.9; }
+                    else if (level < 60) { statusMsg += "Moderate plaque. Flow restricted."; flowText = "Restricted Flow"; flowOpacity = 0.6; }
+                    else if (level < 85) { statusMsg += "Severe plaque! Flow critically low."; flowText = "Very Restricted"; flowOpacity = 0.3; }
+                    else { statusMsg += "Critical blockage! Artery almost occluded."; flowText = "Blocked!"; flowOpacity = 0.1; }
+                    atherosclerosisStatus.textContent = statusMsg;
+                    atheroBloodFlowText.textContent = flowText;
+                    atheroBloodFlowText.style.opacity = flowOpacity;
+                });
+                plaqueLevelSlider.dispatchEvent(new Event('input'));
+            }
+
+            const constrictVesselsBtn = document.getElementById('constrictVesselsBtn');
+            const increaseVolumeBtn = document.getElementById('increaseVolumeBtn');
+            const resetPressureFactorsBtn = document.getElementById('resetPressureFactorsBtn');
+            const bloodPressureValueDisplay = document.getElementById('blood-pressure-value');
+            const vesselLumenHypertension = document.querySelector('.vessel-lumen-hypertension');
+            const hypertensionBloodFlowText = document.getElementById('hypertensionBloodFlowText');
+            const hypertensionStatus = document.getElementById('hypertensionStatus');
+            
+            let pressureFactors = { constriction: 0, volume: 0 }; 
+            const MAX_FACTOR_LEVEL = 2;
+
+            function updateBloodPressureVisuals() {
+                if (!vesselLumenHypertension || !bloodPressureValueDisplay || !hypertensionStatus || !hypertensionBloodFlowText) return;
+                let totalPressureEffect = pressureFactors.constriction + pressureFactors.volume;
+                let pressureText = "Normal"; let pressureCategory = "Normal";
+                let lumenWidthPercent = 90; let lumenColor = '#ffadad'; let flowDescription = "Smooth";
+                if (totalPressureEffect === 1) { pressureCategory = "Elevated"; pressureText = "120-129 / <80 mmHg"; lumenWidthPercent = 78; lumenColor = '#ff9090'; flowDescription = "Slightly Turbulent"; }
+                else if (totalPressureEffect === 2) { pressureCategory = "Hypertension Stage 1"; pressureText = "130-139 / 80-89 mmHg"; lumenWidthPercent = 66; lumenColor = '#ff7272'; flowDescription = "Turbulent"; }
+                else if (totalPressureEffect === 3) { pressureCategory = "Hypertension Stage 2"; pressureText = "140+ / 90+ mmHg"; lumenWidthPercent = 54; lumenColor = '#ff5454'; flowDescription = "Very Turbulent"; }
+                else if (totalPressureEffect >= 4) { pressureCategory = "Hypertensive Crisis"; pressureText = "180+ / 120+ mmHg"; lumenWidthPercent = 42; lumenColor = '#e03030'; flowDescription = "Critical!"; }
+                bloodPressureValueDisplay.textContent = `Current Blood Pressure: ${pressureCategory}`;
+                vesselLumenHypertension.style.width = lumenWidthPercent + '%';
+                vesselLumenHypertension.style.backgroundColor = lumenColor;
+                hypertensionBloodFlowText.textContent = flowDescription;
+                let statusDetail = `Factors: Vessel Constriction Lvl ${pressureFactors.constriction}/${MAX_FACTOR_LEVEL}, Blood Volume Lvl ${pressureFactors.volume}/${MAX_FACTOR_LEVEL}. Overall: ${pressureCategory} (${pressureText} range).`;
+                hypertensionStatus.textContent = statusDetail;
+            }
+
+            if (constrictVesselsBtn) constrictVesselsBtn.addEventListener('click', () => { pressureFactors.constriction = Math.min(MAX_FACTOR_LEVEL, pressureFactors.constriction + 1); updateBloodPressureVisuals(); });
+            if (increaseVolumeBtn) increaseVolumeBtn.addEventListener('click', () => { pressureFactors.volume = Math.min(MAX_FACTOR_LEVEL, pressureFactors.volume + 1); updateBloodPressureVisuals(); });
+            if (resetPressureFactorsBtn) resetPressureFactorsBtn.addEventListener('click', () => { pressureFactors.constriction = 0; pressureFactors.volume = 0; updateBloodPressureVisuals(); });
+            if (vesselLumenHypertension) updateBloodPressureVisuals();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nervous System Simulations</title>
+    <style>
+        /* Common Styles (subset from main_styles.css) */
+        :root { /* Duplicating for self-containment */
+            --bg-cream: #FFFBF0; --bg-white: #FFFFFF; --bg-light-yellowish-green: #E6F0E0;
+            --text-black: #2c2c2c; --text-medium-gray: #555555; --accent-muted-green: #8FBC8F;
+            --highlight-yellow: #FFF3CD; --highlight-yellow-border: #FFEBAA;
+            --button-primary-bg: var(--accent-muted-green); --button-primary-hover-bg: #7aa77a;
+            --button-secondary-bg: #A9A9A9; --button-secondary-hover-bg: #808080;
+            --border-color: #ddd;
+        }
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;line-height:1.7;margin:0;padding:20px;background-color:var(--bg-cream);color:var(--text-black);font-size:16px}
+        .container{max-width:1000px;margin:25px auto;background:var(--bg-white);padding:30px 35px;border-radius:12px;box-shadow:0 5px 25px rgba(0,0,0,0.08);border:1px solid #e0e0e0}
+        h1,h2,h3.sim-title{color:var(--text-black);text-align:center;margin-bottom:25px;font-weight:600}
+        h1{font-size:2.2em;border-bottom:2px solid var(--accent-muted-green);padding-bottom:15px;margin-bottom:35px}
+        h2{font-size:1.8em;margin-top:35px;color:#444}
+        h3.sim-title{font-size:1.5em;margin-top:30px;color:var(--accent-muted-green)}
+        h3.note-title,h3.learn-more-title{font-size:1.3em;margin-top:0;margin-bottom:10px;text-align:left;color:#333;border-bottom:1px solid #eee;padding-bottom:5px}
+        .sub-simulation{background:#f9f9f9;padding:25px;margin-bottom:35px;border-radius:8px;border:1px solid var(--border-color)}
+        .sim-controls{text-align:center;margin-bottom:25px;padding:15px;background-color:var(--bg-light-yellowish-green);border-radius:6px;border:1px solid #d0e0c0}
+        .sim-controls button{margin:8px 10px;padding:12px 20px;font-size:1em;cursor:pointer;background-color:var(--button-primary-bg);color:var(--bg-white);border:none;border-radius:5px;transition:background-color .2s ease,transform .1s ease;font-weight:500}
+        .sim-controls button:hover{background-color:var(--button-primary-hover-bg)}
+        .sim-controls button:active{transform:translateY(1px)}
+        .sim-area{position:relative;min-height:150px;background-color:var(--bg-white);border:1px solid var(--border-color);padding:20px;border-radius:6px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:20px}
+        .sim-status{text-align:center;margin-top:0;font-style:normal;color:var(--text-medium-gray);background-color:#f0f0f0;padding:12px;border-radius:0 0 6px 6px;font-size:1em;min-height:45px;border:1px solid var(--border-color);border-top:none}
+        .note{background-color:var(--highlight-yellow);border-left:6px solid var(--highlight-yellow-border);padding:20px;margin-bottom:25px;border-radius:5px;font-size:.98em}
+        .note p{margin:10px 0;line-height:1.6}
+        .learn-more-section{background-color:var(--bg-light-yellowish-green);border:1px solid #d0e0c0;padding:20px 25px;margin-top:30px;border-radius:8px}
+        .learn-more-section ul{list-style-type:disc;margin-left:25px;padding-left:0}
+        .learn-more-section ol{margin-left: 25px; padding-left: 10px;}
+        .learn-more-section li{margin-bottom:8px;line-height:1.6}
+        .back-link-container{text-align:center}
+        .back-link{display:inline-block;margin:35px auto 10px;padding:12px 25px;background-color:var(--button-secondary-bg);color:var(--bg-white);text-decoration:none;border-radius:5px;transition:background-color .3s ease;font-weight:500;text-align:center}
+        .back-link:hover{background-color:var(--button-secondary-hover-bg)}
+
+        /* Styles specific to nervous_system.html */
+        #reflex-arc-viz-container{display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px;min-height:280px;position:relative}
+        .neuron-path-segment{padding:10px 15px;border:2px solid #b0b0b0;border-radius:6px;background-color:#e8e8e8;text-align:center;font-size:.95em;min-width:200px;transition:background-color .3s ease,border-color .3s ease}
+        .neuron-path-segment.active{background-color:#fffacd;border-color:#ffd700;font-weight:700}
+        .arrow-down{width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:12px solid #888;margin:3px auto}
+        .pain-signal-dot{width:18px;height:18px;background-color:#ff4500;border:2px solid #cc3700;border-radius:50%;position:absolute;opacity:0;transition:top .6s cubic-bezier(.25,.1,.25,1),left .6s cubic-bezier(.25,.1,.25,1),opacity .2s linear;z-index:10;box-shadow:0 0 8px rgba(255,69,0,.7)}
+        #neuroplasticity-viz-container{display:flex;justify-content:space-around;align-items:center;height:180px;position:relative;padding:20px 0}
+        .neuron-neuro{width:60px;height:60px;background-color:#d6eaff;border:2px solid #007bff;border-radius:50%;display:flex;justify-content:center;align-items:center;font-weight:700;font-size:1.1em;transition:transform .2s ease,background-color .2s ease;z-index:1;position:relative}
+        .neuron-neuro.active{transform:scale(1.12);background-color:#b3d9ff}
+        .synapse-neuro-container{position:absolute;height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:0}
+        .synapse-neuro{height:6px;background-color:#888;transition:height .3s ease,background-color .3s ease;border-radius:4px;width:100%}
+        .synapse-neuro-strength{font-size:.8em;color:var(--text-medium-gray);margin-top:3px;background-color:rgba(255,255,255,.7);padding:1px 4px;border-radius:3px}
+        .synaptic-activity-effect{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:10px;height:10px;background-color:#ffeb3b;border-radius:50%;opacity:0;animation:flashSynapse .6s ease-out forwards}
+        @keyframes flashSynapse{0%{opacity:.7;transform:translate(-50%,-50%) scale(.5)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(.5)}}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>3. Exploring the Nervous System</h1>
+        <div class="note">
+            <h3 class="note-title">About these Simulations:</h3>
+            <p>The nervous system is our body's command center. These simulations explore: how our body reacts to pain (reflex arc) and the brain's ability to change (neuroplasticity).</p>
+        </div>
+
+        <div class="sub-simulation" id="pain-reaction-sim">
+            <h3 class="sim-title">3a. Pain Reaction (Reflex Arc)</h3>
+            <div class="sim-controls">
+                <button id="applyStimulusBtn">Apply Painful Stimulus</button>
+            </div>
+            <div class="sim-area" id="reflex-arc-viz-container">
+                <div class="neuron-path-segment" id="stimulusPointEl">Hand (Receptor)</div><div class="arrow-down"></div>
+                <div class="neuron-path-segment" id="sensoryNeuronEl">Sensory Neuron</div><div class="arrow-down"></div>
+                <div class="neuron-path-segment" id="spinalCordEl">Spinal Cord (Interneuron)</div><div class="arrow-down"></div>
+                <div class="neuron-path-segment" id="motorNeuronEl">Motor Neuron</div><div class="arrow-down"></div>
+                <div class="neuron-path-segment" id="effectorMuscleEl">Muscle (Effector)</div>
+                <div class="pain-signal-dot" id="painSignalDot"></div>
+            </div>
+            <p class="sim-status" id="painReactionStatus">Click button to simulate a pain reflex.</p>
+            <div class="learn-more-section">
+                <h3 class="learn-more-title">About Reflex Arcs:</h3>
+                <ul><li>A reflex arc is a neural pathway for reflexes. Sensory neurons often synapse in the spinal cord for faster actions.</li><li>Components: Receptor, Sensory Neuron, Integration Center (Interneuron), Motor Neuron, Effector.</li><li>Reflexes are involuntary, rapid responses crucial for protection.</li></ul>
+            </div>
+        </div>
+
+        <div class="sub-simulation" id="neuroplasticity-sim">
+            <h3 class="sim-title">3b. Neuroplasticity</h3>
+            <div class="sim-controls">
+                <button id="practiceTaskABtn">Practice Skill A (N1-N2)</button>
+                <button id="practiceTaskBBtn">Practice Skill B (N2-N3)</button>
+                <button id="simulateDisuseBtn">Simulate Disuse</button>
+            </div>
+            <div class="sim-area" id="neuroplasticity-viz-container">
+                <div class="neuron-neuro" id="neuron1">N1</div>
+                <div class="synapse-neuro-container" id="sContainer12"><div class="synapse-neuro" id="synapse12"></div><span class="synapse-neuro-strength" id="strength12Display">Strength: 5</span></div>
+                <div class="neuron-neuro" id="neuron2">N2</div>
+                <div class="synapse-neuro-container" id="sContainer23"><div class="synapse-neuro" id="synapse23"></div><span class="synapse-neuro-strength" id="strength23Display">Strength: 5</span></div>
+                <div class="neuron-neuro" id="neuron3">N3</div>
+            </div>
+            <p class="sim-status" id="neuroplasticityStatus">Practice skills to see connections change.</p>
+            <div class="learn-more-section">
+                <h3 class="learn-more-title">About Neuroplasticity:</h3>
+                <ul><li>Neuroplasticity is the brain's ability to form new neural connections.</li><li>It allows adaptation to new situations or compensation for injury.</li><li><strong>LTP (Long-Term Potentiation):</strong> Synaptic strengthening from activity (learning).</li><li><strong>LTD (Long-Term Depression):</strong> Synaptic weakening from disuse (pruning).</li></ul>
+            </div>
+        </div>
+        <div class="back-link-container">
+            <a href="index.html" class="back-link">« Back to Unit 5 Simulations</a>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const applyStimulusBtn = document.getElementById('applyStimulusBtn');
+            const painSignalDot = document.getElementById('painSignalDot');
+            const painReactionStatus = document.getElementById('painReactionStatus');
+            const reflexArcVizContainer = document.getElementById('reflex-arc-viz-container');
+            const reflexPathElements = { stimulus: document.getElementById('stimulusPointEl'), sensory: document.getElementById('sensoryNeuronEl'), spinal: document.getElementById('spinalCordEl'), motor: document.getElementById('motorNeuronEl'), effector: document.getElementById('effectorMuscleEl') };
+            const reflexOrder = ['stimulus', 'sensory', 'spinal', 'motor', 'effector'];
+            let painSignalMoving = false; let currentPainStep = 0;
+
+            function positionSignalDot(targetElement) {
+                if (!painSignalDot || !targetElement || !reflexArcVizContainer) return;
+                const targetRect = targetElement.getBoundingClientRect(); const containerRect = reflexArcVizContainer.getBoundingClientRect();
+                painSignalDot.style.left = (targetRect.left - containerRect.left + targetRect.width / 2 - painSignalDot.offsetWidth / 2) + 'px';
+                painSignalDot.style.top = (targetRect.top - containerRect.top + targetElement.offsetHeight / 2 - painSignalDot.offsetHeight / 2) + 'px';
+            }
+            if (applyStimulusBtn) {
+                applyStimulusBtn.addEventListener('click', () => {
+                    if (painSignalMoving) return; painSignalMoving = true; applyStimulusBtn.disabled = true;
+                    if(painReactionStatus) painReactionStatus.textContent = 'Pain stimulus applied! Signal propagating...';
+                    Object.values(reflexPathElements).forEach(el => {if(el)el.classList.remove('active')}); currentPainStep = 0;
+                    if (painSignalDot) painSignalDot.style.opacity = 0;
+                    function movePainSignal() {
+                        if (currentPainStep < reflexOrder.length) {
+                            const currentElement = reflexPathElements[reflexOrder[currentPainStep]];
+                            if (currentElement) { currentElement.classList.add('active'); positionSignalDot(currentElement); if (painSignalDot) painSignalDot.style.opacity = 1; }
+                            if (currentPainStep > 0) { const prevElement = reflexPathElements[reflexOrder[currentPainStep - 1]]; if (prevElement) prevElement.classList.remove('active'); }
+                            currentPainStep++; setTimeout(movePainSignal, 700);
+                        } else {
+                            if (reflexPathElements.effector) reflexPathElements.effector.classList.add('active');
+                            setTimeout(() => {
+                                Object.values(reflexPathElements).forEach(el => {if(el)el.classList.remove('active')}); if (painSignalDot) painSignalDot.style.opacity = 0;
+                                if(painReactionStatus) painReactionStatus.textContent = 'Reflex action complete. Ready for new stimulus.';
+                                painSignalMoving = false; applyStimulusBtn.disabled = false;
+                            }, 1000);
+                        }
+                    }
+                    movePainSignal();
+                });
+            }
+
+            const practiceTaskABtn = document.getElementById('practiceTaskABtn');
+            const practiceTaskBBtn = document.getElementById('practiceTaskBBtn');
+            const simulateDisuseBtn = document.getElementById('simulateDisuseBtn');
+            const neuroplasticityStatus = document.getElementById('neuroplasticityStatus');
+            const neuron1 = document.getElementById('neuron1'); const neuron2 = document.getElementById('neuron2'); const neuron3 = document.getElementById('neuron3');
+            const sContainer12 = document.getElementById('sContainer12'); const synapse12 = document.getElementById('synapse12'); const strength12Display = document.getElementById('strength12Display');
+            const sContainer23 = document.getElementById('sContainer23'); const synapse23 = document.getElementById('synapse23'); const strength23Display = document.getElementById('strength23Display');
+            const neuroVizContainer = document.getElementById('neuroplasticity-viz-container');
+            let synapseStrengths = { '1-2': 5, '2-3': 5 }; const MAX_STRENGTH_UNIT = 15; const MIN_STRENGTH_UNIT = 1;
+            const BASE_SYNAPSE_HEIGHT_PX = 4; const STRENGTH_HEIGHT_MULTIPLIER_PX = 1;
+
+            function positionSynapseContainers() {
+                if (!neuron1 || !neuron2 || !neuron3 || !sContainer12 || !sContainer23 || !neuroVizContainer) return;
+                function setupContainer(container, nStart, nEnd) {
+                    const nStartRect = nStart.getBoundingClientRect(); const nEndRect = nEnd.getBoundingClientRect(); const parentRect = neuroVizContainer.getBoundingClientRect();
+                    container.style.top = ((nStartRect.top + nStartRect.height / 2) - parentRect.top - container.offsetHeight / 2) + 'px';
+                    container.style.left = ((nStartRect.left + nStart.offsetWidth) - parentRect.left) + 'px';
+                    container.style.width = (nEndRect.left - (nStartRect.left + nStart.offsetWidth)) + 'px';
+                }
+                setupContainer(sContainer12, neuron1, neuron2); setupContainer(sContainer23, neuron2, neuron3);
+            }
+            function updateSynapseVisual(synapseElement, strengthDisplay, strengthUnit) {
+                if (!synapseElement || !strengthDisplay) return;
+                synapseElement.style.height = Math.max(2, BASE_SYNAPSE_HEIGHT_PX + (strengthUnit * STRENGTH_HEIGHT_MULTIPLIER_PX)) + 'px';
+                strengthDisplay.textContent = `Strength: ${strengthUnit}`;
+                if (strengthUnit > 10) synapseElement.style.backgroundColor = '#006400'; else if (strengthUnit > 5) synapseElement.style.backgroundColor = '#228B22'; else synapseElement.style.backgroundColor = '#8FBC8F';
+            }
+            function activateNeuronsNeuro(neuronsToActivate, duration = 400) { neuronsToActivate.forEach(n => { if(n) n.classList.add('active'); }); setTimeout(() => neuronsToActivate.forEach(n => { if(n) n.classList.remove('active'); }), duration); }
+            function showSynapticActivityEffect(synapseContainer) {
+                if (!synapseContainer) return; const effectDot = document.createElement('div'); effectDot.classList.add('synaptic-activity-effect');
+                synapseContainer.appendChild(effectDot); effectDot.addEventListener('animationend', () => effectDot.remove());
+            }
+            if (practiceTaskABtn) practiceTaskABtn.addEventListener('click', () => { activateNeuronsNeuro([neuron1, neuron2]); if (sContainer12) showSynapticActivityEffect(sContainer12); synapseStrengths['1-2'] = Math.min(MAX_STRENGTH_UNIT, synapseStrengths['1-2'] + 2); updateSynapseVisual(synapse12, strength12Display, synapseStrengths['1-2']); if(neuroplasticityStatus) neuroplasticityStatus.textContent = 'Practiced Skill A: N1-N2 strengthened (LTP).'; });
+            if (practiceTaskBBtn) practiceTaskBBtn.addEventListener('click', () => { activateNeuronsNeuro([neuron2, neuron3]); if (sContainer23) showSynapticActivityEffect(sContainer23); synapseStrengths['2-3'] = Math.min(MAX_STRENGTH_UNIT, synapseStrengths['2-3'] + 2); updateSynapseVisual(synapse23, strength23Display, synapseStrengths['2-3']); if(neuroplasticityStatus) neuroplasticityStatus.textContent = 'Practiced Skill B: N2-N3 strengthened (LTP).'; });
+            if (simulateDisuseBtn) simulateDisuseBtn.addEventListener('click', () => { synapseStrengths['1-2'] = Math.max(MIN_STRENGTH_UNIT, synapseStrengths['1-2'] - 1); synapseStrengths['2-3'] = Math.max(MIN_STRENGTH_UNIT, synapseStrengths['2-3'] - 1); updateSynapseVisual(synapse12, strength12Display, synapseStrengths['1-2']); updateSynapseVisual(synapse23, strength23Display, synapseStrengths['2-3']); if(neuroplasticityStatus) neuroplasticityStatus.textContent = 'Simulated Disuse: Connections may weaken (LTD).'; });
+            if (neuron1 && neuroVizContainer) { positionSynapseContainers(); updateSynapseVisual(synapse12, strength12Display, synapseStrengths['1-2']); updateSynapseVisual(synapse23, strength23Display, synapseStrengths['2-3']); if(neuroplasticityStatus) neuroplasticityStatus.textContent = 'Practice skills or disuse to observe neuroplasticity.'; window.addEventListener('resize', positionSynapseContainers); }
+        });
+    </script>
+</body>
+</html>

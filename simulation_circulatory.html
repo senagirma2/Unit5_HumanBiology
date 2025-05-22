@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circulatory System Simulation - SVG Heart</title>
+    <style>
+        /* Common Styles (subset from a potential main_styles.css) */
+        :root {
+            --bg-cream: #FFFBF0;
+            --bg-white: #FFFFFF;
+            --bg-light-yellowish-green: #E6F0E0;
+            --text-black: #2c2c2c;
+            --text-medium-gray: #555555;
+            --accent-muted-green: #8FBC8F;
+            --highlight-yellow: #FFF3CD;
+            --highlight-yellow-border: #FFEBAA;
+            --button-primary-bg: var(--accent-muted-green);
+            --button-primary-hover-bg: #7aa77a;
+            --button-secondary-bg: #A9A9A9;
+            --button-secondary-hover-bg: #808080;
+            --border-color: #ddd;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7; margin: 0; padding: 20px;
+            background-color: var(--bg-cream); color: var(--text-black); font-size: 16px;
+        }
+        .container {
+            max-width: 1000px; margin: 25px auto; background: var(--bg-white);
+            padding: 30px 35px; border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08); border: 1px solid #e0e0e0;
+        }
+        h1, h2, h3.sim-title {
+            color: var(--text-black); text-align: center; margin-bottom: 25px; font-weight: 600;
+        }
+        h1 { font-size: 2.2em; border-bottom: 2px solid var(--accent-muted-green); padding-bottom: 15px; margin-bottom: 35px; }
+        h2 { font-size: 1.8em; margin-top: 35px; color: #444; }
+        h3.sim-title { font-size: 1.5em; margin-top: 30px; color: var(--accent-muted-green); }
+        h3.note-title, h3.learn-more-title {
+            font-size: 1.3em; margin-top: 0; margin-bottom: 10px; text-align: left;
+            color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px;
+        }
+        .simulation-section { /* Matches .sub-simulation from other pages if needed */
+            background: #f9f9f9; padding: 25px; margin-bottom: 35px;
+            border-radius: 8px; border: 1px solid var(--border-color);
+        }
+        .sim-controls {
+            text-align: center; margin-bottom: 25px; padding: 15px;
+            background-color: var(--bg-light-yellowish-green); border-radius: 6px; border: 1px solid #d0e0c0;
+        }
+        .sim-controls button {
+            margin: 8px 10px; padding: 12px 20px; font-size: 1em; cursor: pointer;
+            background-color: var(--button-primary-bg); color: var(--bg-white);
+            border: none; border-radius: 5px; transition: background-color 0.2s ease, transform 0.1s ease;
+            font-weight: 500;
+        }
+        .sim-controls button:hover { background-color: var(--button-primary-hover-bg); }
+        .sim-controls button:active { transform: translateY(1px); }
+        .sim-area {
+            position: relative; min-height: 250px; background-color: var(--bg-white);
+            border: 1px solid var(--border-color); padding: 20px; border-radius: 6px;
+            overflow: visible; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; margin-bottom: 20px;
+        }
+        .sim-status {
+            text-align: center; margin-top: 0; font-style: normal; color: var(--text-medium-gray);
+            background-color: #f0f0f0; padding: 12px; border-radius: 0 0 6px 6px;
+            font-size: 1em; min-height: 45px; border: 1px solid var(--border-color); border-top: none;
+        }
+        .note {
+            background-color: var(--highlight-yellow); border-left: 6px solid var(--highlight-yellow-border);
+            padding: 20px; margin-bottom: 25px; border-radius: 5px; font-size: 0.98em;
+        }
+        .note p { margin: 10px 0; line-height: 1.6; }
+        .learn-more-section {
+            background-color: var(--bg-light-yellowish-green); border: 1px solid #d0e0c0;
+            padding: 20px 25px; margin-top: 30px; border-radius: 8px;
+        }
+        .learn-more-section ul { list-style-type: disc; margin-left: 25px; padding-left: 0; }
+        .learn-more-section li { margin-bottom: 8px; line-height: 1.6; }
+        .back-link-container{ text-align: center; }
+        .back-link {
+            display: inline-block; margin: 35px auto 10px; padding: 12px 25px;
+            background-color: var(--button-secondary-bg); color: var(--bg-white);
+            text-decoration: none; border-radius: 5px; transition: background-color 0.3s ease;
+            font-weight: 500; text-align: center;
+        }
+        .back-link:hover { background-color: var(--button-secondary-hover-bg); }
+
+        /* Styles specific to this circulatory_system.html page - SVG Heart */
+        #circulatory-viz-container {
+            position: relative; width: 100%; max-width: 450px; 
+            min-height: 500px; margin: 20px auto;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        #svg-heart-diagram {
+            width: 70%; max-width: 300px; height: auto; display: block;
+            margin: 20px auto; z-index: 1;
+            animation: subtleSVGPulse 1.6s infinite ease-in-out alternate;
+        }
+        @keyframes subtleSVGPulse {
+            from { transform: scale(1); } to   { transform: scale(1.02); }
+        }
+        /* Default styles for SVG parts if needed, assuming fills are in the SVG itself */
+        #svg-heart-diagram #RightAtrium_group path, 
+        #svg-heart-diagram #RightAtrium_group ellipse { fill: #8ab8d7; }
+        #svg-heart-diagram #RightVentricle_group path,
+        #svg-heart-diagram #RightVentricle_group ellipse { fill: #6f9cb9; }
+        #svg-heart-diagram #LeftAtrium_group path,
+        #svg-heart-diagram #LeftAtrium_group ellipse { fill: #f09090; }
+        #svg-heart-diagram #LeftVentricle_group path,
+        #svg-heart-diagram #LeftVentricle_group ellipse { fill: #d87070; }
+        #svg-heart-diagram #HeartOutline_path { stroke: #502020; stroke-width: 3px; fill: #b94040; }
+
+        .chamber-label-svg {
+            position: absolute; font-size: 0.75em; font-weight: bold; color: var(--text-black);
+            background-color: rgba(255, 255, 255, 0.7); padding: 2px 4px; border-radius: 3px;
+            z-index: 15; pointer-events: none; transform: translate(-50%, -50%);
+        }
+        
+        #svg-heart-diagram .highlighted-svg-chamber path,
+        #svg-heart-diagram .highlighted-svg-chamber ellipse,
+        #svg-heart-diagram .highlighted-svg-chamber polygon,
+        #svg-heart-diagram .highlighted-svg-chamber rect,
+        #svg-heart-diagram g.highlighted-svg-chamber > *:not(text):not(title) { /* Target children of highlighted group, exclude text/title */
+            filter: drop-shadow(0px 0px 6px gold);
+            stroke: #DAA520 !important; 
+            stroke-width: 2.5px !important;
+        }
+        .conceptual-organ {
+            padding: 10px 15px; border: 2px dashed var(--accent-muted-green); border-radius: 8px;
+            text-align: center; font-weight: bold; font-size: 0.95em;
+            background-color: rgba(230, 240, 224, 0.8); transition: background-color 0.3s ease, border-color 0.3s ease;
+            z-index: 0; width: 60%; margin: 10px auto;
+        }
+        .conceptual-organ.highlighted-organ {
+            background-color: var(--highlight-yellow); border-color: var(--highlight-yellow-border);
+            border-style: solid; box-shadow: 0 0 10px var(--highlight-yellow-border);
+        }
+        #css-body-tissues { margin-top: 20px; }
+        .blood-cell-overlay {
+            position: absolute; width: 18px; height: 18px; border-radius: 50%;
+            z-index: 20; 
+            transition: top 1.2s cubic-bezier(0.65, 0, 0.35, 1), left 1.2s cubic-bezier(0.65, 0, 0.35, 1), background-color 0.5s linear;
+            border: 2px solid transparent; box-shadow: 0 0 6px rgba(0,0,0,0.4);
+        }
+        .deoxygenated-blood { background-color: #005f9e !important; border-color: #003f6b !important; } 
+        .oxygenated-blood { background-color: #c81d1d !important; border-color: #8b0000 !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>1. The Circulatory System: Path of Blood</h1>
+
+        <div class="note">
+            <h3 class="note-title">About this Simulation:</h3>
+            <p>This simulation uses an illustrative diagram of the heart to trace the journey of blood. You'll see the four main chambers: Right Atrium, Right Ventricle, Left Atrium, and Left Ventricle, along with conceptual representations of the Lungs and Body Tissues.</p>
+            <p>Follow the "blood cell" and observe its color change, indicating oxygenation (red = oxygen-rich, blue = oxygen-poor). Click "Next Step" to progress through the cardiac cycle and read explanations for each phase.</p>
+        </div>
+
+        <div class="simulation-section"> 
+            <h2>Interactive Simulation</h2>
+            <div class="sim-controls">
+                <button id="nextStepBtnSvgHeart">Next Step in Cycle</button>
+            </div>
+            <div class="sim-area" id="circulatory-viz-container"> 
+                <div class="conceptual-organ" id="css-lungs">LUNGS (Gas Exchange)</div>
+
+                {/* <!-- ===================================================================== --> */}
+                {/* <!-- == IMPORTANT: REPLACE THIS SVG WITH YOUR ACTUAL HEART SVG DIAGRAM == --> */}
+                {/* <!-- Make sure elements within your SVG have IDs like #RightAtrium_group etc. --> */}
+                {/* <!-- This is a VERY simplified placeholder SVG.                      --> */}
+                {/* <!-- ===================================================================== --> */}
+                <svg id="svg-heart-diagram" viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg">
+                    <title>Simplified Heart Diagram</title>
+                    <desc>A basic representation of a heart with four chambers.</desc>
+                    
+                    {/* <!-- Main Heart Outline - A generic heart shape --> */}
+                    <path id="HeartOutline_path" d="M100,170 L20,70 Q20,20 60,20 A40,40 0 0,1 100,60 A40,40 0 0,1 140,20 Q180,20 180,70 Z" 
+                          fill="#b94040" stroke="#502020" stroke-width="2"/>
+                
+                    {/* <!-- Right Atrium (RA) - Top Right from viewer's perspective --> */}
+                    <g id="RightAtrium_group" class="chamber">
+                        <title>Right Atrium</title>
+                        <ellipse id="RightAtrium_path" cx="145" cy="65" rx="35" ry="30" />
+                    </g>
+                    {/* <!-- Right Ventricle (RV) - Bottom Right --> */}
+                    <g id="RightVentricle_group" class="chamber">
+                        <title>Right Ventricle</title>
+                        <path id="RightVentricle_path" d="M160,100 Q150,150 105,165 L100,100 Z" />
+                    </g>
+                    {/* <!-- Left Atrium (LA) - Top Left --> */}
+                    <g id="LeftAtrium_group" class="chamber">
+                         <title>Left Atrium</title>
+                         <ellipse id="LeftAtrium_path" cx="55" cy="65" rx="35" ry="30"/>
+                    </g>
+                    {/* <!-- Left Ventricle (LV) - Bottom Left --> */}
+                    <g id="LeftVentricle_group" class="chamber">
+                        <title>Left Ventricle</title>
+                        <path id="LeftVentricle_path" d="M40,100 Q50,150 95,165 L100,100 Z"/>
+                    </g>
+                    
+                    {/* <!-- Conceptual Vessels - Simple shapes for entry/exit points --> */}
+                    <rect id="vena-cava-top" x="135" y="15" width="20" height="30" fill="#6f9cb9" stroke="#502020" />
+                    <rect id="pulmonary-veins-top" x="45" y="15" width="20" height="30" fill="#f09090" stroke="#502020" />
+                    <ellipse id="pulmonary-artery-out" cx="165" cy="100" rx="12" ry="25" fill="#6f9cb9" stroke="#502020" transform="rotate(30 165 100)" />
+                    <ellipse id="aorta-out" cx="35" cy="100" rx="12" ry="25" fill="#d87070" stroke="#502020" transform="rotate(-30 35 100)" />
+                </svg>
+                {/* <!-- ================= END OF SVG PLACEHOLDER ========================== --> */}
+                
+                <div class="chamber-label-svg" id="label-ra">Right Atrium</div>
+                <div class="chamber-label-svg" id="label-la">Left Atrium</div>
+                <div class="chamber-label-svg" id="label-rv">Right Ventricle</div>
+                <div class="chamber-label-svg" id="label-lv">Left Ventricle</div>
+
+                <div class="conceptual-organ" id="css-body-tissues">BODY TISSUES (O₂ Delivery / CO₂ Pickup)</div>
+                <div class="blood-cell-overlay" id="bloodCellSvg"></div>
+            </div>
+            <p class="sim-status" id="circulatoryStatusSvgHeart">Click "Next Step" to begin the blood's journey.</p>
+        </div>
+
+        <div class="learn-more-section">
+            <h3 class="learn-more-title">The Heart's Chambers and Blood Flow:</h3>
+            <ul>
+                <li><strong>Right Atrium:</strong> Receives deoxygenated (oxygen-poor) blood from the body.</li>
+                <li><strong>Right Ventricle:</strong> Pumps deoxygenated blood to the lungs.</li>
+                <li><strong>Lungs:</strong> Blood releases CO₂ and picks up O₂.</li>
+                <li><strong>Left Atrium:</strong> Receives oxygenated (oxygen-rich) blood from the lungs.</li>
+                <li><strong>Left Ventricle:</strong> Pumps oxygenated blood to the entire body. Its muscular wall is the thickest.</li>
+                <li><strong>Valves:</strong> Ensure one-way blood flow (Tricuspid, Pulmonary, Mitral/Bicuspid, Aortic).</li>
+            </ul>
+        </div>
+        <div class="back-link-container">
+            <a href="index.html" class="back-link">« Back to Unit 5 Simulations</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const nextStepBtn = document.getElementById('nextStepBtnSvgHeart');
+            const bloodCell = document.getElementById('bloodCellSvg');
+            const statusDisplay = document.getElementById('circulatoryStatusSvgHeart');
+            const vizContainer = document.getElementById('circulatory-viz-container');
+            const svgHeart = document.getElementById('svg-heart-diagram');
+
+            const conceptualLungs = document.getElementById('css-lungs');
+            const conceptualBody = document.getElementById('css-body-tissues');
+
+            // --- IMPORTANT: These selectors MUST match IDs in YOUR SVG ---
+            const svgRaTarget = svgHeart ? svgHeart.querySelector('#RightAtrium_group') : null;
+            const svgRvTarget = svgHeart ? svgHeart.querySelector('#RightVentricle_group') : null;
+            const svgLaTarget = svgHeart ? svgHeart.querySelector('#LeftAtrium_group') : null;
+            const svgLvTarget = svgHeart ? svgHeart.querySelector('#LeftVentricle_group') : null;
+            
+            const allHighlightableElements = [svgRaTarget, svgRvTarget, svgLaTarget, svgLvTarget, conceptualLungs, conceptualBody].filter(el => el);
+
+            const labelRa = document.getElementById('label-ra');
+            const labelLa = document.getElementById('label-la');
+            const labelRv = document.getElementById('label-rv');
+            const labelLv = document.getElementById('label-lv');
+
+            let currentStep = -1;
+
+            const simulationPathDefinition = [
+                { 
+                    name: 'BodyReturn', targetElementForBloodCell: conceptualBody, elementToHighlight: conceptualBody,
+                    bloodState: 'deoxygenated', description: "Deoxygenated blood returns from body tissues."
+                },
+                { 
+                    name: 'RightAtriumEntry', targetElementForBloodCell: svgRaTarget, elementToHighlight: svgRaTarget, 
+                    bloodState: 'deoxygenated', description: "Blood enters the Right Atrium."
+                },
+                { 
+                    name: 'RightVentricleEntry', targetElementForBloodCell: svgRvTarget, elementToHighlight: svgRvTarget,
+                    bloodState: 'deoxygenated', description: "Blood moves from Right Atrium to the Right Ventricle."
+                },
+                { 
+                    name: 'ToLungs', targetElementForBloodCell: conceptualLungs, elementToHighlight: conceptualLungs,
+                    bloodState: 'deoxygenated', description: "Right Ventricle pumps blood to the Lungs."
+                },
+                { 
+                    name: 'LeftAtriumEntry', targetElementForBloodCell: svgLaTarget, elementToHighlight: svgLaTarget,
+                    bloodState: 'oxygenated', description: "Oxygenated blood from Lungs enters the Left Atrium."
+                },
+                { 
+                    name: 'LeftVentricleEntry', targetElementForBloodCell: svgLvTarget, elementToHighlight: svgLvTarget,
+                    bloodState: 'oxygenated', description: "Blood moves from Left Atrium to the Left Ventricle."
+                },
+                { 
+                    name: 'ToBody', targetElementForBloodCell: conceptualBody, elementToHighlight: conceptualBody,
+                    bloodState: 'oxygenated', description: "Left Ventricle pumps oxygenated blood to the body."
+                }
+            ];
+
+            function getElementCenterCoordinates(targetElement, referenceContainer) {
+                if (!targetElement || !referenceContainer || !bloodCell ) {
+                    return { x: 0, y: 0, valid: false };
+                }
+                const containerRect = referenceContainer.getBoundingClientRect();
+                let targetCenterXinContainer, targetCenterYinContainer;
+                const isSvgChild = targetElement.closest('svg');
+
+                if (isSvgChild && svgHeart && typeof targetElement.getBBox === 'function') { 
+                    const svgCanvas = targetElement.ownerSVGElement || svgHeart;
+                    if (!svgCanvas) return { x: 0, y: 0, valid: false };
+                    const svgRect = svgCanvas.getBoundingClientRect(); 
+                    const bbox = targetElement.getBBox(); 
+                    if (typeof bbox.x === 'undefined' || typeof bbox.y === 'undefined' || isNaN(bbox.x) || isNaN(bbox.y)) {
+                        return { x:0, y:0, valid: false};
+                    }
+                    targetCenterXinContainer = (svgRect.left - containerRect.left) + (bbox.x + bbox.width / 2);
+                    targetCenterYinContainer = (svgRect.top - containerRect.top) + (bbox.y + bbox.height / 2);
+                } else { 
+                    const targetRect = targetElement.getBoundingClientRect();
+                    targetCenterXinContainer = (targetRect.left - containerRect.left) + targetRect.width / 2;
+                    targetCenterYinContainer = (targetRect.top - containerRect.top) + targetRect.height / 2;
+                }
+                const finalX = targetCenterXinContainer - (bloodCell.offsetWidth / 2);
+                const finalY = targetCenterYinContainer - (bloodCell.offsetHeight / 2);
+                return { x: finalX, y: finalY, valid: true };
+            }
+            
+            function positionLabels() {
+                if (!vizContainer || !svgHeart) return;
+                const elementsToLabel = [
+                    { labelEl: labelRa, svgTarget: svgRaTarget }, { labelEl: labelLa, svgTarget: svgLaTarget },
+                    { labelEl: labelRv, svgTarget: svgRvTarget }, { labelEl: labelLv, svgTarget: svgLvTarget }
+                ];
+                elementsToLabel.forEach(item => {
+                    if (!item.labelEl || !item.svgTarget) { if(item.labelEl) item.labelEl.style.display = 'none'; return; }
+                    const coords = getElementCenterCoordinates(item.svgTarget, vizContainer); 
+                    if(coords.valid) {
+                        item.labelEl.style.left = (coords.x + bloodCell.offsetWidth / 2) + 'px'; 
+                        item.labelEl.style.top = (coords.y + bloodCell.offsetHeight / 2) + 'px';
+                        item.labelEl.style.display = 'block';
+                    } else { item.labelEl.style.display = 'none'; }
+                });
+            }
+
+            function updateBloodCellVisuals(stepData) {
+                if (!bloodCell || !stepData || !stepData.targetElementForBloodCell) return;
+                const coords = getElementCenterCoordinates(stepData.targetElementForBloodCell, vizContainer);
+                if (coords.valid) {
+                    bloodCell.style.left = coords.x + 'px'; bloodCell.style.top = coords.y + 'px';
+                }
+                if (stepData.bloodState === 'oxygenated') {
+                    bloodCell.classList.remove('deoxygenated-blood'); bloodCell.classList.add('oxygenated-blood');
+                } else {
+                    bloodCell.classList.add('deoxygenated-blood'); bloodCell.classList.remove('oxygenated-blood');
+                }
+            }
+
+            function updateHighlights(elementToHighlight) {
+                allHighlightableElements.forEach(el => {
+                    if (el) { el.classList.remove('highlighted-svg-chamber'); el.classList.remove('highlighted-organ');}
+                });
+                if (elementToHighlight) {
+                    if (elementToHighlight.closest('svg') === svgHeart) { elementToHighlight.classList.add('highlighted-svg-chamber'); }
+                    else if (elementToHighlight.classList.contains('conceptual-organ')) { elementToHighlight.classList.add('highlighted-organ'); }
+                }
+            }
+            
+            function advanceSimulation() {
+                currentStep++;
+                if (currentStep >= simulationPathDefinition.length) {
+                    currentStep = 0; 
+                    if(statusDisplay) statusDisplay.innerHTML = `<strong>Cycle Complete!</strong> Starting over. ${simulationPathDefinition[currentStep].description}`;
+                } else {
+                    if(statusDisplay) statusDisplay.innerHTML = `<strong>Step ${currentStep + 1} (${simulationPathDefinition[currentStep].name}):</strong> ${simulationPathDefinition[currentStep].description}`;
+                }
+                const currentStepData = simulationPathDefinition[currentStep];
+                if (currentStepData) { 
+                    if (!currentStepData.targetElementForBloodCell) {
+                        console.error(`Step "${currentStepData.name}": targetElementForBloodCell is null. Check SVG IDs and JS selectors.`);
+                        if(statusDisplay) statusDisplay.innerHTML += "<br><strong style='color:red;'>Error: Sim target not found!</strong>";
+                        return; 
+                    }
+                    updateBloodCellVisuals(currentStepData); 
+                    updateHighlights(currentStepData.elementToHighlight); 
+                }
+            }
+            
+            const essentialElementsPresent = nextStepBtn && bloodCell && statusDisplay && vizContainer && svgHeart &&
+                                          conceptualLungs && conceptualBody &&
+                                          svgRaTarget && svgRvTarget && svgLaTarget && svgLvTarget;
+
+            if (essentialElementsPresent) {
+                requestAnimationFrame(() => { positionLabels(); advanceSimulation(); });
+                nextStepBtn.addEventListener('click', advanceSimulation);
+                const resizeObserver = new ResizeObserver(() => {
+                    requestAnimationFrame(() => { 
+                        positionLabels();
+                        if(currentStep >=0 && currentStep < simulationPathDefinition.length && simulationPathDefinition[currentStep].targetElementForBloodCell) {
+                           updateBloodCellVisuals(simulationPathDefinition[currentStep]);
+                        }
+                    });
+                });
+                if (vizContainer) { resizeObserver.observe(vizContainer); }
+            } else {
+                if(statusDisplay) statusDisplay.innerHTML = "<strong style='color:red;'>Error: Sim cannot start. Crucial elements missing. Check console.</strong>";
+                console.error("Full Init failed. Check HTML IDs & JS selectors, especially for SVG parts like #RightAtrium_group.");
+            }
+        });
+    </script>
+</body>
+</html>
